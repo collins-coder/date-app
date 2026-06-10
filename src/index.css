@@ -1,0 +1,15 @@
+.hearts {
+  position: absolute;
+  top: 20%;
+  width: 100%;
+  text-align: center;
+  font-size: 30px;
+  animation: float 6s infinite ease-in-out;
+  opacity: 0.3;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-30px); }
+  100% { transform: translateY(0px); }
+}
