@@ -13,7 +13,7 @@ export default function App() {
   // TYPEWRITER
   useEffect(() => {
     if (step === 0) {
-      const text = `Hey you 😊... it's ${name}`;
+      const text = `Hey you Aisia😊... it's ${name}`;
       let i = 0;
 
       const interval = setInterval(() => {
