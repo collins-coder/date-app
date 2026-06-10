@@ -1,222 +1,236 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import confetti from "canvas-confetti";
+import { supabase } from "./supabase";
+import "./index.css";
 
-export default function App() {
+function App() {
   const [step, setStep] = useState(0);
-  const [answer, setAnswer] = useState("");
   const [date, setDate] = useState("");
-  const [typedText, setTypedText] = useState("");
-  const [noPos, setNoPos] = useState({ x: 0, y: 0 });
+  const [activities, setActivities] = useState([]);
 
-  const name = "Collins"; // change to "Immortal" anytime
-
-  // TYPEWRITER
-  useEffect(() => {
-    if (step === 0) {
-      const text = `Hey you Aisia😊... it's ${name}`;
-      let i = 0;
-
-      const interval = setInterval(() => {
-        setTypedText(text.slice(0, i));
-        i++;
-        if (i > text.length) clearInterval(interval);
-      }, 70);
-
-      return () => clearInterval(interval);
-    }
-  }, [step]);
-
-  // SEND RESPONSE (OPTIONAL HOOK)
-  const sendResponse = async (data) => {
-    try {
-      // Replace this with your backend / Google Sheets API later
-      await fetch("https://your-api-endpoint.com/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-    } catch (err) {
-      console.log("Response not sent (no backend connected)");
-    }
-  };
-
-  const handleAnswer = (value) => {
-    setAnswer(value);
-
-    if (value === "yes") {
-      confetti({ particleCount: 180, spread: 100, origin: { y: 0.6 } });
-      setStep(2);
+  const toggleActivity = (activity) => {
+    if (activities.includes(activity)) {
+      setActivities(
+        activities.filter((a) => a !== activity)
+      );
     } else {
-      setStep(3);
+      setActivities([...activities, activity]);
     }
-
-    sendResponse({ answer: value, name });
   };
 
-  const moveNoButton = () => {
-    const x = Math.random() * 120 - 60;
-    const y = Math.random() * 120 - 60;
-    setNoPos({ x, y });
+  const saveNo = async () => {
+    await supabase.from("date_responses").insert([
+      {
+        answer: "No",
+      },
+    ]);
+
+    setStep(99);
   };
 
-  const confirmDate = () => {
+  const saveYes = () => {
+    confetti({
+      particleCount: 150,
+      spread: 90,
+    });
+
+    setStep(2);
+  };
+
+  const submitDate = async () => {
+    await supabase.from("date_responses").insert([
+      {
+        answer: "Yes",
+        selected_date: date,
+        activities,
+      },
+    ]);
+
     setStep(5);
-    sendResponse({ answer: "yes", date, name });
   };
 
   return (
-    <div style={styles.container}>
-      <div className="hearts">💗 💖 💕 💞 💗 💖</div>
+    <div className="container">
 
-      {/* STEP 0 - GREETING */}
+      <div className="hearts">
+        ❤️ 💖 💕 💗 💞
+      </div>
+
       {step === 0 && (
-        <div style={styles.card}>
-          <h2>{typedText}</h2>
-          <p>I’ve been thinking about you…</p>
+        <div className="card">
+          <h1>Hey Beautiful 😊</h1>
 
-          <button style={styles.button} onClick={() => setStep(1)}>
-            Continue
-          </button>
-        </div>
-      )}
+          <p>
+            Before you continue...
+          </p>
 
-      {/* STEP 1 - QUESTION */}
-      {step === 1 && (
-        <div style={styles.card}>
-          <h2>Will you go on a date with me? ❤️</h2>
+          <p>
+            I just want you to know
+            this took a little courage
+            from Collins ❤️
+          </p>
 
-          <select
-            onChange={(e) => handleAnswer(e.target.value)}
-            defaultValue=""
-            style={styles.select}
-          >
-            <option value="" disabled>
-              Choose...
-            </option>
-            <option value="yes">Yes 😊</option>
-            <option value="no">No 😅</option>
-          </select>
-
-          {/* FUN NO BUTTON (optional alternative UX) */}
           <button
-            onMouseEnter={moveNoButton}
-            style={{
-              ...styles.noButton,
-              transform: `translate(${noPos.x}px, ${noPos.y}px)`,
-            }}
+            onClick={() => setStep(1)}
           >
-            No 😅
-          </button>
-        </div>
-      )}
-
-      {/* STEP 2 - YES */}
-      {step === 2 && (
-        <div style={styles.card}>
-          <h2>Wow… did you just say yes? 🥹❤️</h2>
-          <p>You just made <b>{name}</b> really happy.</p>
-
-          <button style={styles.button} onClick={() => setStep(4)}>
             Continue
           </button>
         </div>
       )}
 
-      {/* STEP 3 - NO */}
-      {step === 3 && (
-        <div style={styles.card}>
-          <h2>Okay, I understand 🙂</h2>
-          <p>Thanks for being honest with me.</p>
+      {step === 1 && (
+        <div className="card">
+          <h2>
+            There's only one question...
+          </h2>
+
+          <h3>
+            Will you let Collins take you out
+            sometime? ❤️
+          </h3>
+
+          <div className="actions">
+            <button
+              className="yesBtn"
+              onClick={saveYes}
+            >
+              YES 💖
+            </button>
+
+            <button
+              className="noBtn"
+              onClick={saveNo}
+            >
+              NO 🙈
+            </button>
+          </div>
         </div>
       )}
 
-      {/* STEP 4 - DATE */}
-      {step === 4 && (
-        <div style={styles.card}>
+      {step === 2 && (
+        <div className="card">
+          <h1>WAIT... 😍</h1>
+
+          <h2>
+            DID YOU JUST SAY YES?!
+          </h2>
+
+          <p>
+            You just made Collins smile ❤️
+          </p>
+
+          <button
+            onClick={() => setStep(3)}
+          >
+            Continue
+          </button>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="card">
           <h2>When are you free? 📅</h2>
 
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            style={styles.input}
+            onChange={(e) =>
+              setDate(e.target.value)
+            }
           />
 
           <button
-            style={styles.button}
             disabled={!date}
-            onClick={confirmDate}
+            onClick={() => setStep(4)}
           >
-            Confirm
+            Next
           </button>
         </div>
       )}
 
-      {/* STEP 5 - FINAL */}
+      {step === 4 && (
+        <div className="card">
+          <h2>
+            What should our date include?
+          </h2>
+
+          <label>
+            <input
+              type="checkbox"
+              onChange={() =>
+                toggleActivity("Coffee")
+              }
+            />
+            ☕ Coffee
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              onChange={() =>
+                toggleActivity("Food")
+              }
+            />
+            🍕 Food
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              onChange={() =>
+                toggleActivity("Movie")
+              }
+            />
+            🎬 Movie
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              onChange={() =>
+                toggleActivity("Walk")
+              }
+            />
+            🚶 Walk
+          </label>
+
+          <button onClick={submitDate}>
+            Confirm ❤️
+          </button>
+        </div>
+      )}
+
       {step === 5 && (
-        <div style={styles.card}>
-          <h2>Perfect… I’ll see you soon ❤️😊</h2>
-          <p>— {name}</p>
+        <div className="card">
+          <h1>Perfect ❤️</h1>
+
+          <p>
+            Date Accepted ✔️
+          </p>
+
+          <p>
+            Collins has received your answer.
+          </p>
+
+          <h2>
+            See you soon 😊
+          </h2>
+        </div>
+      )}
+
+      {step === 99 && (
+        <div className="card">
+          <h2>
+            Okay, I understand 🙂
+          </h2>
+
+          <p>
+            Thank you for being honest.
+          </p>
         </div>
       )}
     </div>
   );
 }
 
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(135deg, #ffe6f0, #ffffff)",
-    fontFamily: "Arial",
-    overflow: "hidden",
-    position: "relative",
-  },
-
-  card: {
-    background: "white",
-    padding: "30px",
-    borderRadius: "20px",
-    textAlign: "center",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-    width: "320px",
-    zIndex: 2,
-  },
-
-  button: {
-    marginTop: "15px",
-    padding: "10px 20px",
-    borderRadius: "10px",
-    border: "none",
-    background: "#ff4d6d",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  noButton: {
-    marginTop: "15px",
-    padding: "10px 20px",
-    borderRadius: "10px",
-    border: "1px solid #aaa",
-    background: "#fff",
-    cursor: "pointer",
-    position: "relative",
-    transition: "0.2s",
-  },
-
-  select: {
-    marginTop: "10px",
-    padding: "10px",
-    borderRadius: "10px",
-    width: "100%",
-  },
-
-  input: {
-    marginTop: "10px",
-    padding: "10px",
-    borderRadius: "10px",
-    width: "100%",
-  },
-};
+export default App;
