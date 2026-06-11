@@ -86,7 +86,7 @@ function App() {
 
           <p>
             I just want you to know this took a little courage
-            from Collins ❤️
+            from Me ❤️
           </p>
 
           <button onClick={() => setStep(1)}>
