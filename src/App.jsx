@@ -6,6 +6,7 @@ import "./index.css";
 function App() {
   const [step, setStep] = useState(0);
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [activities, setActivities] = useState([]);
 
   const toggleActivity = (activity) => {
@@ -16,7 +17,7 @@ function App() {
     }
   };
 
-  // ❌ NO RESPONSE
+  // Save NO response
   const saveNo = async () => {
     const { data, error } = await supabase
       .from("date_responses")
@@ -25,7 +26,7 @@ function App() {
           answer: "No",
         },
       ])
-      .select(); // IMPORTANT
+      .select();
 
     console.log("SAVE NO DATA:", data);
     console.log("SAVE NO ERROR:", error);
@@ -38,7 +39,7 @@ function App() {
     setStep(99);
   };
 
-  // ✅ YES BUTTON (no DB save yet, just UI + confetti)
+  // YES button
   const saveYes = () => {
     confetti({
       particleCount: 150,
@@ -48,7 +49,7 @@ function App() {
     setStep(2);
   };
 
-  // ✅ FINAL SUBMIT
+  // Final submit
   const submitDate = async () => {
     const { data, error } = await supabase
       .from("date_responses")
@@ -56,10 +57,11 @@ function App() {
         {
           answer: "Yes",
           selected_date: date,
-          activities: activities, // should be jsonb in Supabase
+          selected_time: time,
+          activities: activities,
         },
       ])
-      .select(); // IMPORTANT
+      .select();
 
     console.log("SUBMIT DATA:", data);
     console.log("SUBMIT ERROR:", error);
@@ -83,10 +85,13 @@ function App() {
           <p>Before you continue...</p>
 
           <p>
-            I just want you to know this took a little courage from Collins ❤️
+            I just want you to know this took a little courage
+            from Collins ❤️
           </p>
 
-          <button onClick={() => setStep(1)}>Continue</button>
+          <button onClick={() => setStep(1)}>
+            Continue
+          </button>
         </div>
       )}
 
@@ -94,14 +99,22 @@ function App() {
         <div className="card">
           <h2>There's only one question...</h2>
 
-          <h3>Will you let Collins take you out sometime? ❤️</h3>
+          <h3>
+            Will you let Collins take you out sometime? ❤️
+          </h3>
 
           <div className="actions">
-            <button className="yesBtn" onClick={saveYes}>
+            <button
+              className="yesBtn"
+              onClick={saveYes}
+            >
               YES 💖
             </button>
 
-            <button className="noBtn" onClick={saveNo}>
+            <button
+              className="noBtn"
+              onClick={saveNo}
+            >
               NO 🙈
             </button>
           </div>
@@ -114,9 +127,13 @@ function App() {
 
           <h2>DID YOU JUST SAY YES?!</h2>
 
-          <p>You just made Collins smile ❤️</p>
+          <p>
+            You just made me smile ❤️
+          </p>
 
-          <button onClick={() => setStep(3)}>Continue</button>
+          <button onClick={() => setStep(3)}>
+            Continue
+          </button>
         </div>
       )}
 
@@ -130,7 +147,16 @@ function App() {
             onChange={(e) => setDate(e.target.value)}
           />
 
-          <button disabled={!date} onClick={() => setStep(4)}>
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+          />
+
+          <button
+            disabled={!date || !time}
+            onClick={() => setStep(4)}
+          >
             Next
           </button>
         </div>
@@ -138,7 +164,9 @@ function App() {
 
       {step === 4 && (
         <div className="card">
-          <h2>What should our date include?</h2>
+          <h2>
+            What should our date include? ❤️
+          </h2>
 
           <label>
             <input
@@ -172,7 +200,9 @@ function App() {
             🚶 Walk
           </label>
 
-          <button onClick={submitDate}>Confirm ❤️</button>
+          <button onClick={submitDate}>
+            Confirm ❤️
+          </button>
         </div>
       )}
 
@@ -182,17 +212,33 @@ function App() {
 
           <p>Date Accepted ✔️</p>
 
-          <p>Collins has received your answer.</p>
+          <p>
+            Collins has received your answer.
+          </p>
 
-          <h2>See you soon 😊</h2>
+          <p>📅 Date: {date}</p>
+
+          <p>⏰ Time: {time}</p>
+
+          <h2>
+            ❤️ Be ready, I'll come pick you up at {time}.
+          </h2>
+
+          <p>
+            I can't wait to spend time with you ❤️
+          </p>
         </div>
       )}
 
       {step === 99 && (
         <div className="card">
-          <h2>Okay, I understand 🙂</h2>
+          <h2>
+            Okay, I understand 🙂
+          </h2>
 
-          <p>Thank you for being honest.</p>
+          <p>
+            Thank you for being honest.
+          </p>
         </div>
       )}
     </div>
