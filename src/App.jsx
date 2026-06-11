@@ -10,24 +10,35 @@ function App() {
 
   const toggleActivity = (activity) => {
     if (activities.includes(activity)) {
-      setActivities(
-        activities.filter((a) => a !== activity)
-      );
+      setActivities(activities.filter((a) => a !== activity));
     } else {
       setActivities([...activities, activity]);
     }
   };
 
+  // ❌ NO RESPONSE
   const saveNo = async () => {
-    await supabase.from("date_responses").insert([
-      {
-        answer: "No",
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("date_responses")
+      .insert([
+        {
+          answer: "No",
+        },
+      ])
+      .select(); // IMPORTANT
+
+    console.log("SAVE NO DATA:", data);
+    console.log("SAVE NO ERROR:", error);
+
+    if (error) {
+      alert("Failed to save response: " + error.message);
+      return;
+    }
 
     setStep(99);
   };
 
+  // ✅ YES BUTTON (no DB save yet, just UI + confetti)
   const saveYes = () => {
     confetti({
       particleCount: 150,
@@ -37,70 +48,60 @@ function App() {
     setStep(2);
   };
 
+  // ✅ FINAL SUBMIT
   const submitDate = async () => {
-    await supabase.from("date_responses").insert([
-      {
-        answer: "Yes",
-        selected_date: date,
-        activities,
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("date_responses")
+      .insert([
+        {
+          answer: "Yes",
+          selected_date: date,
+          activities: activities, // should be jsonb in Supabase
+        },
+      ])
+      .select(); // IMPORTANT
+
+    console.log("SUBMIT DATA:", data);
+    console.log("SUBMIT ERROR:", error);
+
+    if (error) {
+      alert("Failed to save date: " + error.message);
+      return;
+    }
 
     setStep(5);
   };
 
   return (
     <div className="container">
-
-      <div className="hearts">
-        ❤️ 💖 💕 💗 💞
-      </div>
+      <div className="hearts">❤️ 💖 💕 💗 💞</div>
 
       {step === 0 && (
         <div className="card">
           <h1>Hey Beautiful 😊</h1>
 
-          <p>
-            Before you continue...
-          </p>
+          <p>Before you continue...</p>
 
           <p>
-            I just want you to know
-            this took a little courage
-            from Collins ❤️
+            I just want you to know this took a little courage from Collins ❤️
           </p>
 
-          <button
-            onClick={() => setStep(1)}
-          >
-            Continue
-          </button>
+          <button onClick={() => setStep(1)}>Continue</button>
         </div>
       )}
 
       {step === 1 && (
         <div className="card">
-          <h2>
-            There's only one question...
-          </h2>
+          <h2>There's only one question...</h2>
 
-          <h3>
-            Will you let Collins take you out
-            sometime? ❤️
-          </h3>
+          <h3>Will you let Collins take you out sometime? ❤️</h3>
 
           <div className="actions">
-            <button
-              className="yesBtn"
-              onClick={saveYes}
-            >
+            <button className="yesBtn" onClick={saveYes}>
               YES 💖
             </button>
 
-            <button
-              className="noBtn"
-              onClick={saveNo}
-            >
+            <button className="noBtn" onClick={saveNo}>
               NO 🙈
             </button>
           </div>
@@ -111,19 +112,11 @@ function App() {
         <div className="card">
           <h1>WAIT... 😍</h1>
 
-          <h2>
-            DID YOU JUST SAY YES?!
-          </h2>
+          <h2>DID YOU JUST SAY YES?!</h2>
 
-          <p>
-            You just made Collins smile ❤️
-          </p>
+          <p>You just made Collins smile ❤️</p>
 
-          <button
-            onClick={() => setStep(3)}
-          >
-            Continue
-          </button>
+          <button onClick={() => setStep(3)}>Continue</button>
         </div>
       )}
 
@@ -134,15 +127,10 @@ function App() {
           <input
             type="date"
             value={date}
-            onChange={(e) =>
-              setDate(e.target.value)
-            }
+            onChange={(e) => setDate(e.target.value)}
           />
 
-          <button
-            disabled={!date}
-            onClick={() => setStep(4)}
-          >
+          <button disabled={!date} onClick={() => setStep(4)}>
             Next
           </button>
         </div>
@@ -150,16 +138,12 @@ function App() {
 
       {step === 4 && (
         <div className="card">
-          <h2>
-            What should our date include?
-          </h2>
+          <h2>What should our date include?</h2>
 
           <label>
             <input
               type="checkbox"
-              onChange={() =>
-                toggleActivity("Coffee")
-              }
+              onChange={() => toggleActivity("Coffee")}
             />
             ☕ Coffee
           </label>
@@ -167,9 +151,7 @@ function App() {
           <label>
             <input
               type="checkbox"
-              onChange={() =>
-                toggleActivity("Food")
-              }
+              onChange={() => toggleActivity("Food")}
             />
             🍕 Food
           </label>
@@ -177,9 +159,7 @@ function App() {
           <label>
             <input
               type="checkbox"
-              onChange={() =>
-                toggleActivity("Movie")
-              }
+              onChange={() => toggleActivity("Movie")}
             />
             🎬 Movie
           </label>
@@ -187,16 +167,12 @@ function App() {
           <label>
             <input
               type="checkbox"
-              onChange={() =>
-                toggleActivity("Walk")
-              }
+              onChange={() => toggleActivity("Walk")}
             />
             🚶 Walk
           </label>
 
-          <button onClick={submitDate}>
-            Confirm ❤️
-          </button>
+          <button onClick={submitDate}>Confirm ❤️</button>
         </div>
       )}
 
@@ -204,29 +180,19 @@ function App() {
         <div className="card">
           <h1>Perfect ❤️</h1>
 
-          <p>
-            Date Accepted ✔️
-          </p>
+          <p>Date Accepted ✔️</p>
 
-          <p>
-            Collins has received your answer.
-          </p>
+          <p>Collins has received your answer.</p>
 
-          <h2>
-            See you soon 😊
-          </h2>
+          <h2>See you soon 😊</h2>
         </div>
       )}
 
       {step === 99 && (
         <div className="card">
-          <h2>
-            Okay, I understand 🙂
-          </h2>
+          <h2>Okay, I understand 🙂</h2>
 
-          <p>
-            Thank you for being honest.
-          </p>
+          <p>Thank you for being honest.</p>
         </div>
       )}
     </div>
